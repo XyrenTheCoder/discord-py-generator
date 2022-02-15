@@ -11,7 +11,7 @@
         "        var = ' + '.join(arr)\n",
         "        await ctx.send(f'`{var}` = __{ans}__\n--end of calculation--'')\n\n"
     ],
-    ''subtract":[
+    "subtract":[
         "    @commands.command()\n",
         "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
         "    async def subtract(self, ctx, *nums:float):\n",
