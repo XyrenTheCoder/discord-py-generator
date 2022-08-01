@@ -5,6 +5,7 @@ ban
 bannedwords
 beg
 buy
+cexec
 deposit
 divide
 guess
