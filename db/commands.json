@@ -630,5 +630,23 @@
         "    async def squareroot(self, ctx, num: float):\n",
         "        ans = cmath.sqrt(num)\n",
         "        await ctx.send(f'`√ {num}` = __{ans}__\n\n--end of calculation--')\n\n"
+     ],
+     "cexec":[
+        "def cleanup_code(content):\n",
+	    "    if content.startswith('```') and content.endswith: return '\n'.join(content.split('\n')[1:-1])\n",
+        "	 return content.strip('` \n')\n\n",
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def cexec(self, ctx, *, body):\n",
+        "	     body = cleanup_code(body)\n",
+        "  	     if os.path.isfile(\"./a.out\"): os.system(\"rm -r ./a.out\")\n",
+        "	     if os.path.isfile(\"./file1.c\"): os.system(\"rm -r ./file1.c\")\n",
+        "	     f = open(\"./file1.c\", \"w\")\n",
+        "	     f.write(body)\n",
+        "	     f.close()\n",
+        "	     c = subprocess.run(\"gcc ./file1.c\", capture_output=True, text=True, shell=True)\n",
+        "	     if c.returncode != 0: return await ctx.send(f\"```c\n{c.stderr}```\")\n",
+        "	     p = subprocess.check_output(\"./a.out\", shell=True)\n",
+        "	     return await ctx.send(f\"```c\n{p.decode()}\n```\")\n\n"
      ]
 }
