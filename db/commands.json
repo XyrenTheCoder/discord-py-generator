@@ -310,17 +310,15 @@
         "    @commands.command()\n",
         "    @commands.cooldown(1, 30, commands.BucketType.user)\n",
         "    async def trivia(self, ctx, difficulty:str=None):\n",
-        "        p = HTMLParser()\n",
-        "        parser = HTMLParser()\n",
         "        if difficulty == None: r = requests.get(\"https://opentdb.com/api.php?amount=50&type=multiple\")\n",
         "        else: r = requests.get(f\"https://opentdb.com/api.php?amount=50&type=multiple&difficulty={difficulty}\")\n",
         "        if r.json()[\"response_code\"] != 0: return await ctx.reply(f\"{difficulty} is an invalid difficulty\")\n",
         "        rnd = random.choice(r.json()[\"results\"])\n",
-        "        question = p.unescape(rnd[\"question\"])\n",
-        "        rnd[\"correct_answer\"] = parser.unescape(rnd[\"correct_answer\"])\n",
+        "        question = html.unescape(rnd[\"question\"])\n",
+        "        rnd[\"correct_answer\"] = html.unescape(rnd[\"correct_answer\"])\n",
         "\n",
         "        for i in rnd[\"incorrect_answers\"]:\n",
-        "            rnd[\"incorrect_answers\"][rnd[\"incorrect_answers\"].index(i)] = parser.unescape(rnd[\"incorrect_answers\"][rnd[\"incorrect_answers\"].index(i)])\n",
+        "            rnd[\"incorrect_answers\"][rnd[\"incorrect_answers\"].index(i)] = html.unescape(rnd[\"incorrect_answers\"][rnd[\"incorrect_answers\"].index(i)])\n",
         "\n",
         "        arr = list()\n",
         "        arr.append(rnd[\"correct_answer\"])\n",
@@ -574,5 +572,81 @@
         "    @commands.command()\n",
         "    async def invite(self, ctx):\n",
         "        await ctx.reply(f\"https://discord.com/api/oauth2/authorize?client_id={clientid}&permissions=8&scope=bot\")\n\n"
-    ]
+    ],
+    "sum":[
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def sum(self, ctx, *nums:float)\n",
+        "        ans = 0\n",
+        "        arr = list()\n",
+        "        for num in nums:\n",
+        "            ans += num\n",
+        "            arr.append(str(num))\n",
+        "        var = ' + '.join(arr)\n",
+        "        await ctx.send(f'`{var}` = __{ans}__\n--end of calculation--'')\n\n"
+    ],
+    "subtract":[
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def subtract(self, ctx, *nums:float):\n",
+        "        nums = list(nums)\n",
+        "        arr = list()\n",
+        "        arr.append(str(nums[0]))\n",
+        "        ans = nums[0]\n",
+        "        nums.remove(nums[0])\n",
+        "        for num in nums:\n",
+        "            ans -= num\n",
+        "            arr.append(str(num))\n",
+        "        var = ' - '.join(arr)\n",
+        "        await ctx.send(f'`{var}` = __{ans}__\n--end of calculation--')\n\n"
+     ],
+     "multiply":[
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def multiply(self, ctx, num1: float, num2: float):\n",
+        "        ans = str(num1 * num2)\n",
+        "        await ctx.send(f'`{num1} × {num2}` = __{ans}__\n\n--end of calculation--')\n\n"
+     ],
+     "divide":[
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def divide(self, ctx, num1: float, num2: float):\n",
+        "        if num2 == 0:\n",
+        "            await ctx.send('math error: divided by zero.'')\n",
+        "            return\n",
+        "        ans = str(num1 / num2)\n",
+        "        await ctx.send(f'`{num1} ÷ {num2}` = __{ans}__\n\n--end of calculation--')\n\n"
+     ],
+     "power":[
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def power(self, ctx, num1: float, num2: int):\n",
+        "        ans = str(num1 ** num2)\n",
+        "        await ctx.send(f'`{num1} ^ {num2}` = __{ans}__\n\n--end of calculation--')\n\n"
+     ],
+     "squareroot":[
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def squareroot(self, ctx, num: float):\n",
+        "        ans = cmath.sqrt(num)\n",
+        "        await ctx.send(f'`√ {num}` = __{ans}__\n\n--end of calculation--')\n\n"
+     ],
+     "cexec":[
+        "def cleanup_code(content):\n",
+	    "    if content.startswith('```') and content.endswith: return '\n'.join(content.split('\n')[1:-1])\n",
+        "	 return content.strip('` \n')\n\n",
+        "    @commands.command()\n",
+        "    @commands.cooldown(1, 5, commands.BucketType.user)\n",
+        "    async def cexec(self, ctx, *, body):\n",
+        "	     body = cleanup_code(body)\n",
+        "  	     if os.path.isfile(\"./a.out\"): os.system(\"rm -r ./a.out\")\n",
+        "	     if os.path.isfile(\"./file1.c\"): os.system(\"rm -r ./file1.c\")\n",
+        "	     f = open(\"./file1.c\", \"w\")\n",
+        "	     f.write(body)\n",
+        "	     f.close()\n",
+        "	     c = subprocess.run(\"gcc ./file1.c\", capture_output=True, text=True, shell=True)\n",
+        "	     if c.returncode != 0: return await ctx.send(f\"```c\n{c.stderr}```\")\n",
+        "	     p = subprocess.check_output(\"./a.out\", shell=True)\n",
+        "	     return await ctx.send(f\"```c\n{p.decode()}\n```\")\n\n"
+     ]
 }
