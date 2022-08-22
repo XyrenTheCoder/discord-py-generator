@@ -83,18 +83,14 @@ def itemgen():
         else: break
 
 def modinsprompt():
-    inp = input("Install required modules? (y/n): ")
+    inp = input("Install required modules? [y/N]: ")
     if inp.lower() == "y" or inp.lower() == "yes":
         if not os.path.isfile(f"{os.getcwd()}/requirements.txt"): print("[FATAL] Cannot find requirements.txt")
         if os.name == "nt":
             os.system("py -m pip install -r requirements.txt")
         else: os.system("pip install -r requirements.txt")
-    elif inp.lower() == "n" or inp.lower() == "no":
-        print("Exiting...")
-        return
     else:
-        print(f"{inp}: bad input: {inp}")
-        status = 1
+        print("Exiting...")
         return
 
 def addv(dic, key, valarr):
@@ -199,6 +195,7 @@ def keep_alive():
     file = open(f"{os.getcwd()}/out/archiescript.py", "w")
     file.write("""
 import os, sys, string
+
 def encode(text):
     arr = []
     for i in text:
@@ -213,6 +210,7 @@ def encode(text):
             arr.append(var)
     arr.append(".;")
     return ''.join(arr)
+    
 def decode(text):
     value = 0
     arr = []
@@ -323,13 +321,16 @@ userid = int("%s")
 class MainCog(commands.Cog):
     def __init__(self, client:commands.Bot):
         self.client = client
+        
     def addv(self, dic, key, valarr):
         if key not in dic:
             dic[key] = list()
         dic[key].extend(valarr)
+        
     def save(self):
         with open("database/user.json", "w+") as f: json.dump(userdat, f)
         with open("database/guild.json", "w+") as f: json.dump(gdata, f)
+        
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'): return
@@ -372,6 +373,7 @@ class MainCog(commands.Cog):
         else:
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+            
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
@@ -425,15 +427,12 @@ class MainCog(commands.Cog):
 
 try:
     if os.path.isfile(f"{os.getcwd()}/cmds.txt"):
-        inp = input("Add keep alive script for 24/7 hosting in replit? (y/n): ")
-        inp1 = input("Start item generator? (y/n): ")
+        inp = input("Add keep alive script for 24/7 hosting in replit? [y/N]: ")
+        inp1 = input("Start item generator? [y/N]: ")
         if inp1.lower() == "y" or inp1.lower() == "yes": itemgen()
         else: pass
         if inp.lower() == "y" or inp.lower() == "yes": gen(f"{os.getcwd()}/cmds.txt", True)
-        elif inp.lower() == "n" or inp.lower() == "no": gen(f"{os.getcwd()}/cmds.txt")
-        else:
-            print("Invalid input")
-            status = 1
+        else: gen(f"{os.getcwd()}/cmds.txt")
     else: pmsg()
 except Exception as e:
     print(f"[Internal error] {type(e).__name__}: {e}")
