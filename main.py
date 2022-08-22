@@ -19,7 +19,7 @@ def write(name, cost, isUsable=False, reward=None, rwmnt=None, rwlow=1, rwhigh=1
         items[name]["reward"] = reward
         items[name]["rwmnt"] = rwmnt
         if rwmnt == "random":
-            if rwlow > rwhigh:
+            if int(rwlow) > int(rwhigh):
                 print("[ERROR] lowest value is greater than higher value")
                 return
             items[name]["lowest"] = int(rwlow)
