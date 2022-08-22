@@ -14,7 +14,7 @@ if it is your first time running this script run the bot generator.py file and i
 
 
 
-If you find any bug create an issue
+If you find any bugs create an issue
 
 ## credits
 math commands made by [archisha69](https://github.com/archisha69)
