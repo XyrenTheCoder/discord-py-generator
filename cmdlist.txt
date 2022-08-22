@@ -40,3 +40,5 @@ unlock
 userinfo
 withdraw
 work
+decode
+encode
