@@ -648,5 +648,13 @@
         "	     if c.returncode != 0: return await ctx.send(f\"```c\n{c.stderr}```\")\n",
         "	     p = subprocess.check_output(\"./a.out\", shell=True)\n",
         "	     return await ctx.send(f\"```c\n{p.decode()}\n```\")\n\n"
+     ],
+     "decode":[
+	"    @commands.command()\n",
+	"    async def decode(self, ctx, *, text): return await ctx.send(archiescript.decode(text))"
+     ],
+     "encode":[
+	"    @commands.command()\n",
+	"    async def encode(self, ctx, *, text): return await ctx.send(f\"`{archiescript.encode(text)}`\")"
      ]
 }
