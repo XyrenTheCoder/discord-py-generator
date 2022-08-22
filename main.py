@@ -435,7 +435,7 @@ try:
         else: gen(f"{os.getcwd()}/cmds.txt")
     else: pmsg()
 except Exception as e:
-    print("----beginning of crash----")
+    print("----beginning of crash----\n")
     print(traceback.format_exc())
     print("----end of crash----")
     status = 1
