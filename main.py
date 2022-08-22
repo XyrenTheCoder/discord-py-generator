@@ -2,7 +2,7 @@
 #if you get internal error create an issue in github repository
 #DO NOT MODIFY
 
-import os, json, sys
+import os, json, sys, traceback
 
 try:
     with open(f"db/commands.json") as f: data = json.load(f)
@@ -435,6 +435,8 @@ try:
         else: gen(f"{os.getcwd()}/cmds.txt")
     else: pmsg()
 except Exception as e:
-    print(f"[Internal error] {type(e).__name__}: {e}")
+    print("----beginning of crash----")
+    print(traceback.format_exc())
+    print("----end of crash----")
     status = 1
 sys.exit(status)
