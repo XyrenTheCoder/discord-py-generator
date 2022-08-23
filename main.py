@@ -2,13 +2,10 @@
 #if you get internal error create an issue in github repository
 #DO NOT MODIFY
 
-import os, json, sys
-
-if os.name == "nt": pathsp = "\\"
-else: pathsp = "/"
+import os, json, sys, traceback
 
 try:
-    with open(f"db{pathsp}commands.json") as f: data = json.load(f)
+    with open(f"db/commands.json") as f: data = json.load(f)
 except Exception as e: print(f"{type(e).__name__}: {e}")
 
 status = 0
@@ -22,7 +19,7 @@ def write(name, cost, isUsable=False, reward=None, rwmnt=None, rwlow=1, rwhigh=1
         items[name]["reward"] = reward
         items[name]["rwmnt"] = rwmnt
         if rwmnt == "random":
-            if rwlow > rwhigh:
+            if int(rwlow) > int(rwhigh):
                 print("[ERROR] lowest value is greater than higher value")
                 return
             items[name]["lowest"] = int(rwlow)
@@ -86,18 +83,14 @@ def itemgen():
         else: break
 
 def modinsprompt():
-    inp = input("Install required modules? (y/n): ")
+    inp = input("Install required modules? [y/N]: ")
     if inp.lower() == "y" or inp.lower() == "yes":
-        if not os.path.isfile(f"{os.getcwd()}{pathsp}requirements.txt"): print("[FATAL] Cannot find requirements.txt")
+        if not os.path.isfile(f"{os.getcwd()}/requirements.txt"): print("[FATAL] Cannot find requirements.txt")
         if os.name == "nt":
             os.system("py -m pip install -r requirements.txt")
         else: os.system("pip install -r requirements.txt")
-    elif inp.lower() == "n" or inp.lower() == "no":
-        print("Exiting...")
-        return
     else:
-        print(f"{inp}: bad input: {inp}")
-        status = 1
+        print("Exiting...")
         return
 
 def addv(dic, key, valarr):
@@ -112,12 +105,12 @@ def pmsg():
 
 def mkdb():
     print("[INFO] writing database")
-    path = f"{os.getcwd()}{pathsp}out{pathsp}database"
+    path = f"{os.getcwd()}/out/database"
     if not os.path.isdir(path):
         os.mkdir(path)
     files = ["user", "guild", "items"]
     for i in files:
-        fl = open(f"{path}{pathsp}{i}.json", "w")
+        fl = open(f"{path}/{i}.json", "w")
         fl.write("{}")
         fl.close()
     if os.path.isfile("items.json"):
@@ -175,39 +168,74 @@ def gen(_file, genserver:bool=False):
         return
     if token == None: token = "token"
     print("[INFO] Reading file complete")
-    if not os.path.isdir(f"{os.getcwd()}{pathsp}out"):
+    if not os.path.isdir(f"{os.getcwd()}/out"):
         path = os.path.join(os.getcwd(), "out")
         os.mkdir(path)
     else: print("[WARNING] Overwriting existing bot...")
-    if not os.path.isdir(f"{os.getcwd()}{pathsp}out{pathsp}cogs"):
-        path = os.path.join(f"{os.getcwd()}{pathsp}out", "cogs")
+    if not os.path.isdir(f"{os.getcwd()}/out/cogs"):
+        path = os.path.join(f"{os.getcwd()}/out", "cogs")
         os.mkdir(path)
     if "rank" in to_write: ranking = "true"
     else: ranking = "false"
-    if genserver and not os.path.isfile(f"{os.getcwd()}{pathsp}out{pathsp}keep_alive.py"):
-        file = open(f"{os.getcwd()}{pathsp}out{pathsp}keep_alive.py", "w")
+    if genserver and not os.path.isfile(f"{os.getcwd()}/out/keep_alive.py"):
+        file = open(f"{os.getcwd()}/out/keep_alive.py", "w")
         file.write("""from flask import Flask
 from threading import Thread
 app = Flask('')
-
 @app.route('/', methods=['GET'])
 def main():
     return 'I am online', 200
-
 def run():
     app.run(host="0.0.0.0", port=8080)
-
 def keep_alive():
     server = Thread(target=run)
     server.daemon = True
     server.start()
         """)
-    file = open(f"{os.getcwd()}{pathsp}out{pathsp}bot.py", "w")
+    file = open(f"{os.getcwd()}/out/archiescript.py", "w")
+    file.write("""
+import os, sys, string
+
+def encode(text):
+    arr = []
+    for i in text:
+        if i not in list(string.letters + string.digits):
+            print(f"Invalid character at position {text.index(i)}")
+            return
+        if i == " ": arr.append("*")
+        elif i.isupper(): arr.append(f"{(int(hex(ord(i)), 16) - int('0x40', 16))*'+'}@")
+        elif i.islower(): arr.append(f"{(int(hex(ord(i)), 16) - int('0x60', 16))*'+'}#")
+        elif i.isdigit:
+            var = "+"*int(i) + "&!"
+            arr.append(var)
+    arr.append(".;")
+    return ''.join(arr)
+    
+def decode(text):
+    value = 0
+    arr = []
+    out = str()
+    for i in text:
+        if i == "+": value += 1
+        elif i == "-": value -= 1
+        elif i == ".": out += ''.join(arr)
+        elif i == "#":
+            arr.append(chr(0x60+value))
+            value = 0
+        elif i == "@":
+            arr.append(chr(0x40+value))
+            value = 0
+        elif i == ";": break
+        elif i == "*": arr.append(" ")
+        elif i == "!": value = 0
+        elif i == "&": arr.append(str(value))
+    return ''.join(arr)
+    """)
+    file = open(f"{os.getcwd()}/out/bot.py", "w")
     file.write(f"""import json, discord, random
 from discord.ext import commands
 from discord.ext.commands import *
 {'from keep_alive import keep_alive' if genserver else ''}
-
 client = commands.Bot(command_prefix=\"{prefix}\")
 client.load_extension(\"cogs.MainCog\")
 {'keep_alive()' if genserver else ''}
@@ -266,12 +294,11 @@ client.run(\"{token}\")""")
             inventory += "        await ctx.reply(embed=embed)\n"
             shop += "        await ctx.reply(embed=embed)\n"
             icmds = True
-    file = open(f"{os.getcwd()}{pathsp}out{pathsp}cogs{pathsp}MainCog.py", "w")
+    file = open(f"{os.getcwd()}/out/cogs/MainCog.py", "w")
     file.write("""#generated by discord-py-generator
-import json, requests, discord, math, sys, praw, traceback, prawcore, datetime, asyncio, random
+import json, requests, discord, math, sys, praw, traceback, prawcore, datetime, asyncio, random, archiescript
 from discord.ext import *
 import html
-
 on_cooldown = {}
 cd = {}
 invest_time = 3600
@@ -289,23 +316,21 @@ with open(f"database/items.json", "r") as f: items = json.load(f)
 reddit = praw.Reddit(client_id='_pazwWZHi9JldA',
                      client_secret='1tq1HM7UMEGIro6LlwtlmQYJ1jB4vQ',
                      user_agent='idk', check_for_async=False) 
-
 global userid
 userid = int("%s")
-
 class MainCog(commands.Cog):
     def __init__(self, client:commands.Bot):
         self.client = client
-
+        
     def addv(self, dic, key, valarr):
         if key not in dic:
             dic[key] = list()
         dic[key].extend(valarr)
-
+        
     def save(self):
         with open("database/user.json", "w+") as f: json.dump(userdat, f)
         with open("database/guild.json", "w+") as f: json.dump(gdata, f)
-
+        
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'): return
@@ -348,7 +373,7 @@ class MainCog(commands.Cog):
         else:
             print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
             traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
-
+            
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
@@ -401,18 +426,17 @@ class MainCog(commands.Cog):
     modinsprompt()
 
 try:
-    if os.path.isfile(f"{os.getcwd()}{pathsp}cmds.txt"):
-        inp = input("Add keep alive script for 24/7 hosting in replit? (y/n): ")
-        inp1 = input("Start item generator? (y/n): ")
+    if os.path.isfile(f"{os.getcwd()}/cmds.txt"):
+        inp = input("Add keep alive script for 24/7 hosting in replit? [y/N]: ")
+        inp1 = input("Start item generator? [y/N]: ")
         if inp1.lower() == "y" or inp1.lower() == "yes": itemgen()
         else: pass
-        if inp.lower() == "y" or inp.lower() == "yes": gen(f"{os.getcwd()}{pathsp}cmds.txt", True)
-        elif inp.lower() == "n" or inp.lower() == "no": gen(f"{os.getcwd()}{pathsp}cmds.txt")
-        else:
-            print("Invalid input")
-            status = 1
+        if inp.lower() == "y" or inp.lower() == "yes": gen(f"{os.getcwd()}/cmds.txt", True)
+        else: gen(f"{os.getcwd()}/cmds.txt")
     else: pmsg()
 except Exception as e:
-    print(f"[Internal error] {type(e).__name__}: {e}")
+    print("----beginning of crash----\n")
+    print(traceback.format_exc())
+    print("----end of crash----")
     status = 1
 sys.exit(status)
